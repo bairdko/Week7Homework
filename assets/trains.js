@@ -28,8 +28,9 @@ $('#add-train').on('click',function(event){
     destination: destination,
     startTime: startTime,
     frequency: frequency
-});
+  });
 
+});
 //create tables 
 
   
@@ -86,72 +87,4 @@ database.ref().on("child_added", function (snapshot) {
 
 },  function (errorObject) {
   console.log("Errors handled: " + errorObject.code);
-  });
 });
-
-
-//if there is a value, create table
-function doOnStart(){
-  database.ref().on('value',function(snapshot){
-    var allTrains = snapshot.val();
-    var ids = Object.keys(snapshot.val());
-      for(var i = 0; i < ids.length; i++){
-        //create rows here	
-        var currentTrain = allTrains[ids[i]] 
-        
-        var tableItem = $("<tr>");
-        var row = $("<td>");
-      
-        var sTime = currentTrain.startTime;
-        var freq = currentTrain.frequency;
-      
-        //convert to hh:mm A
-        var sTime = moment(sTime,'HH:mm').format('hh:mm A');
-      
-        //create Next Arrvival 
-      
-        var nextArrival = moment(sTime, 'hh:mm A').add(parseInt(freq),'minutes');
-        var now = moment();
-      
-        // if positive, first arrive is before current time
-        // if negative, first arrive is next train
-      
-        var timeDiff = now.diff(nextArrival,'minutes');
-      
-        do {
-          nextArrival = moment(nextArrival, 'hh:mm A').add(parseInt(freq),'minutes');
-          timeDiff = now.diff(nextArrival,'minutes');
-      
-          console.log(nextArrival);
-          console.log(freq);
-        } while (timeDiff > 0);
-      
-        //create minutes away
-        var minutesAway = moment().diff(nextArrival,'minutes');
-        console.log(minutesAway);
-      
-        //create rows
-      
-        row = $("<td>" + currentTrain.trainName + "</td>");
-        tableItem.append(row);
-      
-        row = $("<td>" + currentTrain.destination + "</td>");
-        tableItem.append(row);
-      
-        row = $("<td>" + currentTrain.frequency + " min"+ "</td>");
-        tableItem.append(row);
-      
-        row = $("<td>" + nextArrival.format('hh:mm A') + "</td>");
-        tableItem.append(row);
-      
-        row = $("<td>" + Math.abs(minutesAway) + "min" + "</td>");
-        tableItem.append(row);
-      
-        $('#dataRow').append(tableItem);
-        
-      }
-    });
-
-}
-
-doOnStart();
